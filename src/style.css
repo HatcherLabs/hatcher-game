@@ -56,10 +56,16 @@ button {
 
 #game canvas {
   display: block;
+  cursor: grab;
+}
+
+.dragging-map #game canvas {
+  cursor: grabbing;
 }
 
 .hud,
 .exchange-panel,
+.nav-chip,
 .hotbar,
 .event-strip {
   position: absolute;
@@ -186,6 +192,55 @@ h2 {
   cursor: pointer;
 }
 
+.nav-chip {
+  left: 16px;
+  bottom: 146px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 9px;
+  width: min(342px, calc(100vw - 32px));
+  min-height: 46px;
+  padding: 8px 10px;
+}
+
+.nav-chip div {
+  min-width: 0;
+}
+
+.nav-chip span,
+.nav-chip em {
+  display: block;
+  color: var(--green);
+  font-size: 11px;
+  font-style: normal;
+  font-weight: 900;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.nav-chip strong {
+  display: block;
+  overflow: hidden;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nav-chip button {
+  min-width: 58px;
+  min-height: 30px;
+  border: 1px solid rgba(255, 214, 107, 0.36);
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.28);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 850;
+}
+
 .market-rows,
 .inventory-rows {
   display: grid;
@@ -297,6 +352,7 @@ h2 {
 
 .hotbar button:hover,
 .market-row:hover,
+.nav-chip button:hover,
 #collapseExchangeBtn:hover {
   border-color: var(--gold);
   filter: brightness(1.08);
@@ -370,6 +426,12 @@ h2 {
     grid-template-columns: 1fr;
     gap: 2px;
   }
+
+  .nav-chip {
+    bottom: 148px;
+    left: 10px;
+    width: min(318px, calc(100vw - 20px));
+  }
 }
 
 @media (max-width: 560px) {
@@ -389,5 +451,13 @@ h2 {
   .event-strip {
     left: 10px;
     right: 10px;
+  }
+
+  .nav-chip {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .nav-chip em {
+    display: none;
   }
 }

@@ -52,4 +52,6 @@ Current baseline:
 - Hatcher-specific resource names and market verbs.
 - Original lightweight market tick simulation in TypeScript.
 - Pixel Farm Valley map, character, and item sprites copied under `public/assets/` as temporary open-source prototype art.
+- Cropped `isometric-city` construction/city props added under `public/assets/city-builder/` for district landmarks.
+- Current map presentation uses Phaser camera bounds, drag/WASD panning, wheel zoom, animated trade routes, and DOM HUD panels.
 - Replace or reskin prototype art before any polished public launch if Hatcher needs a fully proprietary visual identity.
