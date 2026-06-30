@@ -43,6 +43,11 @@ type AuthoredLot = {
   frame: number
 }
 
+type GridPoint = {
+  row: number
+  col: number
+}
+
 const TILE_FRAME_WIDTH = 130
 const TILE_FRAME_HEIGHT = 230
 const TILE_WIDTH = 128
@@ -93,6 +98,15 @@ const frames = {
   signalDepot: 71,
 }
 
+const roadTileKeys = new Set<string>([
+  ...gridLine({ row: 8, col: 1 }, { row: 8, col: 16 }),
+  ...gridLine({ row: 1, col: 8 }, { row: 16, col: 8 }),
+  ...gridLine({ row: 4, col: 3 }, { row: 4, col: 14 }),
+  ...gridLine({ row: 13, col: 3 }, { row: 13, col: 14 }),
+  ...gridLine({ row: 4, col: 3 }, { row: 13, col: 3 }),
+  ...gridLine({ row: 4, col: 14 }, { row: 13, col: 14 }),
+].map((point) => tileKey(point.row, point.col)))
+
 const authoredLots: AuthoredLot[] = [
   { row: 1, col: 6, frame: frames.parkA },
   { row: 1, col: 13, frame: frames.signalDepot },
@@ -102,17 +116,17 @@ const authoredLots: AuthoredLot[] = [
   { row: 3, col: 5, frame: frames.civic },
   { row: 3, col: 12, frame: frames.glassTower },
   { row: 4, col: 2, frame: frames.redBlockTall },
-  { row: 4, col: 7, frame: frames.cornerShop },
-  { row: 4, col: 14, frame: frames.tanBlock },
+  { row: 5, col: 7, frame: frames.cornerShop },
+  { row: 5, col: 15, frame: frames.tanBlock },
   { row: 5, col: 4, frame: frames.market },
   { row: 5, col: 11, frame: frames.redLab },
   { row: 6, col: 2, frame: frames.parkA },
   { row: 6, col: 15, frame: frames.blueBlock },
   { row: 7, col: 6, frame: frames.smallShop },
   { row: 7, col: 10, frame: frames.exchangeHouse },
-  { row: 8, col: 13, frame: frames.greenMarket },
-  { row: 9, col: 3, frame: frames.tanBlockTall },
-  { row: 9, col: 8, frame: frames.plaza },
+  { row: 7, col: 13, frame: frames.greenMarket },
+  { row: 9, col: 4, frame: frames.tanBlockTall },
+  { row: 9, col: 9, frame: frames.plaza },
   { row: 9, col: 15, frame: frames.brickTower },
   { row: 10, col: 5, frame: frames.redOffice },
   { row: 10, col: 11, frame: frames.whiteTower },
@@ -122,8 +136,8 @@ const authoredLots: AuthoredLot[] = [
   { row: 12, col: 4, frame: frames.redBlock },
   { row: 12, col: 9, frame: frames.canopy },
   { row: 12, col: 15, frame: frames.market },
-  { row: 13, col: 6, frame: frames.tanBlock },
-  { row: 13, col: 11, frame: frames.redBlockTall },
+  { row: 14, col: 6, frame: frames.tanBlock },
+  { row: 14, col: 11, frame: frames.redBlockTall },
   { row: 14, col: 3, frame: frames.compactBlock },
   { row: 14, col: 14, frame: frames.lowHouse },
   { row: 15, col: 7, frame: frames.signalDepot },
@@ -131,6 +145,30 @@ const authoredLots: AuthoredLot[] = [
   { row: 16, col: 4, frame: frames.parkA },
   { row: 16, col: 10, frame: frames.parkB },
 ]
+
+function gridLine(start: GridPoint, end: GridPoint) {
+  const points: GridPoint[] = []
+  const rowStep = Math.sign(end.row - start.row)
+  const colStep = Math.sign(end.col - start.col)
+  const steps = Math.max(Math.abs(end.row - start.row), Math.abs(end.col - start.col))
+
+  for (let step = 0; step <= steps; step += 1) {
+    points.push({
+      row: start.row + rowStep * step,
+      col: start.col + colStep * step,
+    })
+  }
+
+  return points
+}
+
+function tileKey(row: number, col: number) {
+  return `${row}:${col}`
+}
+
+function isRoadTile(row: number, col: number) {
+  return roadTileKeys.has(tileKey(row, col))
+}
 
 const commodities: Commodity[] = [
   { id: 'hashOre', name: 'Hash Ore', shortName: 'Ore', icon: 'bronze', color: 0xe7b55b, basePrice: 18, volatility: 0.09 },
@@ -370,6 +408,7 @@ class MarketScene extends Phaser.Scene {
 
     this.drawBackdrop()
     this.drawIsoCity()
+    this.drawRoadLayer()
     this.drawSiteLayer()
     this.drawWorldVignette()
 
@@ -414,25 +453,8 @@ class MarketScene extends Phaser.Scene {
   }
 
   private getTileFrame(row: number, col: number) {
-    const authored = authoredLots.find((lot) => lot.row === row && lot.col === col)
-
-    if (authored) {
-      return authored.frame
-    }
-
-    const mainRoad = row === 8 || col === 8
-    const northRoad = row === 3 && col > 2 && col < 15
-    const eastRoad = col === 13 && row > 3 && row < 16
-    const southRoad = row === 14 && col > 3 && col < 14
-    const westRoad = col === 3 && row > 3 && row < 15
-    const isRoad = mainRoad || northRoad || eastRoad || southRoad || westRoad
-
-    if (isRoad && (row + col) % 5 === 0) {
-      return frames.roadCrossA
-    }
-
-    if (isRoad) {
-      return (row + col) % 2 === 0 ? frames.roadA : frames.roadB
+    if (isRoadTile(row, col)) {
+      return frames.empty
     }
 
     if ((row === 0 || row === 17 || col === 0 || col === 17) && (row + col) % 4 === 0) {
@@ -443,7 +465,48 @@ class MarketScene extends Phaser.Scene {
       return frames.parkB
     }
 
+    const authored = authoredLots.find((lot) => lot.row === row && lot.col === col)
+
+    if (authored) {
+      return authored.frame
+    }
+
     return frames.empty
+  }
+
+  private drawRoadLayer() {
+    for (let row = 0; row < MAP_ROWS; row += 1) {
+      for (let col = 0; col < MAP_COLS; col += 1) {
+        if (isRoadTile(row, col)) {
+          this.drawRoadTile(row, col)
+        }
+      }
+    }
+  }
+
+  private drawRoadTile(row: number, col: number) {
+    const center = this.tileCenter(row, col)
+    const topY = center.y - halfTileH
+    const road = this.add.graphics().setDepth(center.y + 2)
+    const hasNorth = isRoadTile(row - 1, col)
+    const hasSouth = isRoadTile(row + 1, col)
+    const hasWest = isRoadTile(row, col - 1)
+    const hasEast = isRoadTile(row, col + 1)
+    const connections = [hasNorth, hasSouth, hasWest, hasEast].filter(Boolean).length
+
+    this.drawTileDiamond(road, center.x, topY, 0x4f5354, 0.94, 0x2e3333, 0.5)
+
+    road.lineStyle(1, 0x707577, 0.34)
+    road.beginPath()
+    road.moveTo(center.x - halfTileW + 10, topY + halfTileH)
+    road.lineTo(center.x, topY + halfTileH * 2 - 8)
+    road.lineTo(center.x + halfTileW - 10, topY + halfTileH)
+    road.strokePath()
+
+    if (connections >= 3) {
+      road.fillStyle(0xe9e4c7, 0.72)
+      road.fillCircle(center.x, center.y - 2, 5)
+    }
   }
 
   private drawSiteLayer() {
