@@ -16,19 +16,14 @@ Source:
 
 These assets are being used to move the prototype toward a real browser-game feel quickly. Treat them as prototype/reference art until Hatcher-specific assets are produced or licensed intentionally.
 
-Additional temporary prototype props:
+Additional prototype world map:
 
-- `public/assets/city-builder/construction-yard.png`
-- `public/assets/city-builder/forge-works.png`
-- `public/assets/city-builder/market-stadium.png`
-- `public/assets/city-builder/relay-plant.png`
-- `public/assets/city-builder/seed-fountain.png`
-- `public/assets/city-builder/vault-hall.png`
+- `public/assets/world/market-island.png`
 
 Source:
 
-- Repository: `amilich/isometric-city`
+- Repository: `goncalojbsousa/Farming-Simulator-Cabacos`
 - License file found during audit: MIT
-- Original local audit copy: `/home/cristian/Projects/research/hatcher-game-source-audit/isometric-city`
+- Original local audit copy: `/home/cristian/Projects/research/hatcher-game-source-audit/Farming-Simulator-Cabacos`
 
-These files are cropped, transparency-cleaned prototype props from the source sprite sheet and should be replaced or intentionally licensed before a polished public launch.
+The island map is being used as a temporary prototype world because its authored town layout is cleaner than the earlier overlay-heavy test scene.
