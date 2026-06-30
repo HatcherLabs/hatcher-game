@@ -46,10 +46,10 @@ This repository starts as original Hatcher Markets code, with selected ideas tak
 
 Use a clean Phaser 3 + TypeScript + Vite frontend. Keep simulation state outside the renderer and use DOM panels for dense HUD/market text.
 
-Start with:
+Current baseline:
 
 - Phaser/Vite runtime shape inspired by the farming/mining candidates.
 - Hatcher-specific resource names and market verbs.
 - Original lightweight market tick simulation in TypeScript.
-- No copied third-party assets in the first baseline.
-
+- Pixel Farm Valley map, character, and item sprites copied under `public/assets/` as temporary open-source prototype art.
+- Replace or reskin prototype art before any polished public launch if Hatcher needs a fully proprietary visual identity.
