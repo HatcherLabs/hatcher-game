@@ -27,8 +27,8 @@ This repository starts as original Hatcher Markets code, with selected ideas tak
 - `victorqribeiro/isocity`
   - License: MIT.
   - Stack: plain JavaScript.
-  - Result: static reference only.
-  - Useful parts: simple isometric city builder concept and Kenney texture attribution.
+  - Result: adapted into the Phaser prototype as runtime-built isometric city tiles.
+  - Useful parts: simple isometric city builder concept, grid projection, and Kenney texture attribution.
 
 - `Jackson-Wozniak/Stock-Market-Simulation`
   - License: MIT.
@@ -51,7 +51,7 @@ Current baseline:
 - Phaser/Vite runtime shape inspired by the farming/mining candidates.
 - Hatcher-specific resource names and market verbs.
 - Original lightweight market tick simulation in TypeScript.
-- Pixel Farm Valley character and item sprites copied under `public/assets/` as temporary open-source prototype art.
-- The current world map uses the cleaner Cabacos island preview as a prototype background.
-- Current map presentation uses Phaser camera bounds, drag/WASD panning, wheel zoom, discrete site markers, and DOM HUD panels.
+- Pixel Farm Valley item sprites copied under `public/assets/` as temporary open-source prototype art.
+- The active map is now a runtime-built isometric city grid using `isocity`/Kenney tile frames, not a screenshot background.
+- Current map presentation uses Phaser camera bounds, drag/WASD panning, wheel zoom, discrete lot markers, and DOM HUD panels.
 - Replace or reskin prototype art before any polished public launch if Hatcher needs a fully proprietary visual identity.

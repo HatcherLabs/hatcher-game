@@ -16,14 +16,15 @@ Source:
 
 These assets are being used to move the prototype toward a real browser-game feel quickly. Treat them as prototype/reference art until Hatcher-specific assets are produced or licensed intentionally.
 
-Additional prototype world map:
+Current active isometric city tiles:
 
-- `public/assets/world/market-island.png`
+- `public/assets/isocity/iso-tiles.png`
 
 Source:
 
-- Repository: `goncalojbsousa/Farming-Simulator-Cabacos`
+- Repository: `victorqribeiro/isocity`
 - License file found during audit: MIT
-- Original local audit copy: `/home/cristian/Projects/research/hatcher-game-source-audit/Farming-Simulator-Cabacos`
+- Original local audit copy: `/home/cristian/Projects/research/hatcher-game-source-audit/isocity`
+- Texture credit in source README: Kenney / OpenGameArt
 
-The island map is being used as a temporary prototype world because its authored town layout is cleaner than the earlier overlay-heavy test scene.
+The active city is now assembled at runtime from isometric tiles instead of using a screenshot background.

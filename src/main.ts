@@ -33,9 +33,104 @@ type Site = {
   id: CommodityId
   label: string
   role: string
-  x: number
-  y: number
+  row: number
+  col: number
 }
+
+type AuthoredLot = {
+  row: number
+  col: number
+  frame: number
+}
+
+const TILE_FRAME_WIDTH = 130
+const TILE_FRAME_HEIGHT = 230
+const TILE_WIDTH = 128
+const TILE_HEIGHT = 64
+const TILE_SCALE = 1.06
+const TILE_ANCHOR_Y = 130 / 230
+const MAP_ROWS = 18
+const MAP_COLS = 18
+const WORLD_MARGIN = 280
+const ISO_TOP = 190
+
+const halfTileW = (TILE_WIDTH * TILE_SCALE) / 2
+const halfTileH = (TILE_HEIGHT * TILE_SCALE) / 2
+const isoOriginX = (MAP_ROWS - 1) * halfTileW + WORLD_MARGIN
+
+const frames = {
+  empty: 0,
+  plaza: 1,
+  roadA: 2,
+  roadB: 3,
+  roadCrossA: 4,
+  roadCrossB: 5,
+  parkA: 7,
+  parkB: 8,
+  civic: 9,
+  compactBlock: 46,
+  cornerShop: 47,
+  waterA: 48,
+  waterB: 49,
+  waterC: 50,
+  market: 54,
+  redMarket: 55,
+  greenMarket: 56,
+  whiteTower: 57,
+  glassTower: 58,
+  brickTower: 59,
+  redBlock: 60,
+  redBlockTall: 61,
+  tanBlock: 62,
+  tanBlockTall: 63,
+  blueBlock: 64,
+  redLab: 65,
+  smallShop: 66,
+  lowHouse: 67,
+  redOffice: 68,
+  canopy: 69,
+  exchangeHouse: 70,
+  signalDepot: 71,
+}
+
+const authoredLots: AuthoredLot[] = [
+  { row: 1, col: 6, frame: frames.parkA },
+  { row: 1, col: 13, frame: frames.signalDepot },
+  { row: 2, col: 3, frame: frames.compactBlock },
+  { row: 2, col: 9, frame: frames.redMarket },
+  { row: 2, col: 15, frame: frames.parkB },
+  { row: 3, col: 5, frame: frames.civic },
+  { row: 3, col: 12, frame: frames.glassTower },
+  { row: 4, col: 2, frame: frames.redBlockTall },
+  { row: 4, col: 7, frame: frames.cornerShop },
+  { row: 4, col: 14, frame: frames.tanBlock },
+  { row: 5, col: 4, frame: frames.market },
+  { row: 5, col: 11, frame: frames.redLab },
+  { row: 6, col: 2, frame: frames.parkA },
+  { row: 6, col: 15, frame: frames.blueBlock },
+  { row: 7, col: 6, frame: frames.smallShop },
+  { row: 7, col: 10, frame: frames.exchangeHouse },
+  { row: 8, col: 13, frame: frames.greenMarket },
+  { row: 9, col: 3, frame: frames.tanBlockTall },
+  { row: 9, col: 8, frame: frames.plaza },
+  { row: 9, col: 15, frame: frames.brickTower },
+  { row: 10, col: 5, frame: frames.redOffice },
+  { row: 10, col: 11, frame: frames.whiteTower },
+  { row: 11, col: 2, frame: frames.parkB },
+  { row: 11, col: 7, frame: frames.blueBlock },
+  { row: 11, col: 13, frame: frames.glassTower },
+  { row: 12, col: 4, frame: frames.redBlock },
+  { row: 12, col: 9, frame: frames.canopy },
+  { row: 12, col: 15, frame: frames.market },
+  { row: 13, col: 6, frame: frames.tanBlock },
+  { row: 13, col: 11, frame: frames.redBlockTall },
+  { row: 14, col: 3, frame: frames.compactBlock },
+  { row: 14, col: 14, frame: frames.lowHouse },
+  { row: 15, col: 7, frame: frames.signalDepot },
+  { row: 15, col: 12, frame: frames.cornerShop },
+  { row: 16, col: 4, frame: frames.parkA },
+  { row: 16, col: 10, frame: frames.parkB },
+]
 
 const commodities: Commodity[] = [
   { id: 'hashOre', name: 'Hash Ore', shortName: 'Ore', icon: 'bronze', color: 0xe7b55b, basePrice: 18, volatility: 0.09 },
@@ -45,10 +140,10 @@ const commodities: Commodity[] = [
 ]
 
 const sites: Site[] = [
-  { id: 'hashOre', label: 'Cliff Mine', role: 'Extract Hash Ore', x: 338, y: 164 },
-  { id: 'signalDust', label: 'Relay Hill', role: 'Harvest Signal Dust', x: 662, y: 92 },
-  { id: 'computeAlloy', label: 'Foundry Row', role: 'Refine Compute Alloy', x: 706, y: 430 },
-  { id: 'liquidityCrystal', label: 'Harbor Exchange', role: 'Broker Crystal orders', x: 1140, y: 438 },
+  { id: 'hashOre', label: 'Ore Yard', role: 'Extract Hash Ore', row: 5, col: 4 },
+  { id: 'signalDust', label: 'Relay Campus', role: 'Harvest Signal Dust', row: 3, col: 12 },
+  { id: 'computeAlloy', label: 'Foundry Row', role: 'Refine Compute Alloy', row: 10, col: 5 },
+  { id: 'liquidityCrystal', label: 'Exchange Tower', role: 'Broker Crystal orders', row: 11, col: 13 },
 ]
 
 const state: GameState = {
@@ -88,7 +183,7 @@ app.innerHTML = `
 
     <section class="hud top-left">
       <p class="eyebrow">Hatcher Markets</p>
-      <h1>Island Exchange</h1>
+      <h1>Iso Exchange</h1>
       <p id="siteRole" class="site-role"></p>
     </section>
 
@@ -112,7 +207,7 @@ app.innerHTML = `
 
     <section class="nav-chip">
       <div>
-        <span>Map</span>
+        <span>City Grid</span>
         <strong id="positionLabel">Drag / WASD</strong>
       </div>
       <button id="focusBtn" type="button">Focus</button>
@@ -149,7 +244,6 @@ const refs = {
 
 class MarketScene extends Phaser.Scene {
   private lastSnapshot = ''
-  private worldScale = 1
   private worldWidth = 0
   private worldHeight = 0
   private dragPoint: Phaser.Math.Vector2 | null = null
@@ -163,15 +257,17 @@ class MarketScene extends Phaser.Scene {
   }
 
   preload() {
-    this.load.image('world', '/assets/world/market-island.png')
-    this.load.image('agent', '/assets/characters/agent-idle.png')
+    this.load.spritesheet('isoTiles', '/assets/isocity/iso-tiles.png', {
+      frameWidth: TILE_FRAME_WIDTH,
+      frameHeight: TILE_FRAME_HEIGHT,
+    })
     this.load.image('gold', '/assets/items/gold.png')
     this.load.image('silver', '/assets/items/silver.png')
     this.load.image('bronze', '/assets/items/bronze.png')
   }
 
   create() {
-    this.cameras.main.setBackgroundColor('#0e1514')
+    this.cameras.main.setBackgroundColor('#0f1918')
     this.input.setDefaultCursor('grab')
     this.cursors = this.input.keyboard?.createCursorKeys()
     this.wasd = this.input.keyboard?.addKeys('W,A,S,D') as Record<'W' | 'A' | 'S' | 'D', Phaser.Input.Keyboard.Key>
@@ -210,7 +306,7 @@ class MarketScene extends Phaser.Scene {
       (pointer: Phaser.Input.Pointer, _gameObjects: Phaser.GameObjects.GameObject[], _deltaX: number, deltaY: number) => {
         const camera = this.cameras.main
         const oldZoom = camera.zoom
-        const nextZoom = Phaser.Math.Clamp(oldZoom + (deltaY > 0 ? -0.08 : 0.08), 0.72, 1.2)
+        const nextZoom = Phaser.Math.Clamp(oldZoom + (deltaY > 0 ? -0.08 : 0.08), 0.68, 1.28)
 
         if (nextZoom === oldZoom) {
           return
@@ -249,13 +345,12 @@ class MarketScene extends Phaser.Scene {
 
   public focusSite(siteId = state.selectedSite, smooth = true) {
     const site = getSite(siteId)
-    const targetX = this.worldX(site.x + 56)
-    const targetY = this.worldY(site.y + 52)
+    const target = this.tileCenter(site.row, site.col)
 
     if (smooth) {
-      this.cameras.main.pan(targetX, targetY, 520, 'Sine.easeInOut', true)
+      this.cameras.main.pan(target.x, target.y, 520, 'Sine.easeInOut', true)
     } else {
-      this.cameras.main.centerOn(targetX, targetY)
+      this.cameras.main.centerOn(target.x, target.y)
     }
 
     this.time.delayedCall(smooth ? 540 : 0, () => {
@@ -270,20 +365,12 @@ class MarketScene extends Phaser.Scene {
 
     this.tweens.killAll()
     this.children.removeAll(true)
-
-    const viewportW = Number(this.scale.width)
-    const viewportH = Number(this.scale.height)
-    const map = this.textures.get('world').getSourceImage() as HTMLImageElement
-    const coverScale = Math.max(viewportW / map.width, viewportH / map.height)
-    this.worldScale = Phaser.Math.Clamp(coverScale * 1.52, 1.16, 1.72)
-    this.worldWidth = map.width * this.worldScale
-    this.worldHeight = map.height * this.worldScale
-
+    this.configureWorld()
     camera.setBounds(0, 0, this.worldWidth, this.worldHeight)
-    this.add.image(0, 0, 'world').setOrigin(0).setScale(this.worldScale).setDepth(0)
 
+    this.drawBackdrop()
+    this.drawIsoCity()
     this.drawSiteLayer()
-    this.drawAgent()
     this.drawWorldVignette()
 
     if (!this.didInitialFocus) {
@@ -297,89 +384,170 @@ class MarketScene extends Phaser.Scene {
     this.updateCameraHud()
   }
 
+  private configureWorld() {
+    this.worldWidth = isoOriginX + (MAP_COLS - 1) * halfTileW + WORLD_MARGIN
+    this.worldHeight = ISO_TOP + (MAP_ROWS + MAP_COLS) * halfTileH + TILE_FRAME_HEIGHT * TILE_SCALE + WORLD_MARGIN
+  }
+
+  private drawBackdrop() {
+    const bg = this.add.graphics().setDepth(-10)
+    bg.fillStyle(0x10201f, 1)
+    bg.fillRect(0, 0, this.worldWidth, this.worldHeight)
+    bg.fillStyle(0x1a302b, 0.72)
+    bg.fillEllipse(this.worldWidth / 2, ISO_TOP + 620, this.worldWidth * 0.82, 1040)
+    bg.lineStyle(2, 0x29443c, 0.36)
+    bg.strokeEllipse(this.worldWidth / 2, ISO_TOP + 620, this.worldWidth * 0.82, 1040)
+  }
+
+  private drawIsoCity() {
+    for (let row = 0; row < MAP_ROWS; row += 1) {
+      for (let col = 0; col < MAP_COLS; col += 1) {
+        const frame = this.getTileFrame(row, col)
+        const point = this.gridToWorld(row, col)
+        this.add
+          .image(point.x, point.y, 'isoTiles', frame)
+          .setOrigin(0.5, TILE_ANCHOR_Y)
+          .setScale(TILE_SCALE)
+          .setDepth(point.y)
+      }
+    }
+  }
+
+  private getTileFrame(row: number, col: number) {
+    const authored = authoredLots.find((lot) => lot.row === row && lot.col === col)
+
+    if (authored) {
+      return authored.frame
+    }
+
+    const mainRoad = row === 8 || col === 8
+    const northRoad = row === 3 && col > 2 && col < 15
+    const eastRoad = col === 13 && row > 3 && row < 16
+    const southRoad = row === 14 && col > 3 && col < 14
+    const westRoad = col === 3 && row > 3 && row < 15
+    const isRoad = mainRoad || northRoad || eastRoad || southRoad || westRoad
+
+    if (isRoad && (row + col) % 5 === 0) {
+      return frames.roadCrossA
+    }
+
+    if (isRoad) {
+      return (row + col) % 2 === 0 ? frames.roadA : frames.roadB
+    }
+
+    if ((row === 0 || row === 17 || col === 0 || col === 17) && (row + col) % 4 === 0) {
+      return frames.parkA
+    }
+
+    if ((row + col) % 11 === 0) {
+      return frames.parkB
+    }
+
+    return frames.empty
+  }
+
   private drawSiteLayer() {
     for (const site of sites) {
       this.addSite(site)
     }
   }
 
-  private drawAgent() {
-    const selected = getSite(state.selectedSite)
-    const agentX = this.worldX(selected.x + 78)
-    const agentY = this.worldY(selected.y + 28)
-    const sprite = this.add.image(agentX, agentY, 'agent').setScale(1.25 * this.worldScale).setDepth(20)
-    this.tweens.add({
-      targets: sprite,
-      y: agentY - 5 * this.worldScale,
-      duration: 900,
-      ease: 'Sine.easeInOut',
-      yoyo: true,
-      repeat: -1,
-    })
-
-    const beam = this.add.graphics().setDepth(19)
-    beam.lineStyle(2.2 * this.worldScale, state.market[selected.id].color, 0.78)
-    beam.strokeCircle(agentX, agentY + 12 * this.worldScale, 15 * this.worldScale)
-  }
-
   private drawWorldVignette() {
     const vignette = this.add.graphics()
     vignette.setScrollFactor(0)
-    vignette.setDepth(30)
+    vignette.setDepth(10000)
     vignette.fillGradientStyle(0x000000, 0x000000, 0x000000, 0x000000, 0.18, 0.04, 0.02, 0.22)
     vignette.fillRect(0, 0, Number(this.scale.width), Number(this.scale.height))
   }
 
   private addSite(site: Site) {
-    const x = this.worldX(site.x)
-    const y = this.worldY(site.y)
+    const center = this.tileCenter(site.row, site.col)
     const quote = state.market[site.id]
     const isSelected = state.selectedSite === site.id
-    const radius = (isSelected ? 22 : 12) * this.worldScale
-    const glow = this.add.graphics().setDepth(14)
-    glow.fillStyle(0x090b08, isSelected ? 0.42 : 0.34)
-    glow.fillCircle(x + 2 * this.worldScale, y + 4 * this.worldScale, radius * 0.95)
-    glow.fillStyle(quote.color, isSelected ? 0.2 : 0.12)
-    glow.fillCircle(x, y, radius * 0.86)
-    glow.lineStyle((isSelected ? 2 : 1.2) * this.worldScale, quote.color, isSelected ? 0.82 : 0.44)
-    glow.strokeCircle(x, y, radius)
+    const markerDepth = center.y + 180
+    const marker = this.add.graphics().setDepth(markerDepth)
 
-    const icon = this.add.image(x, y - 4 * this.worldScale, quote.icon).setScale((isSelected ? 1.35 : 0.95) * this.worldScale).setDepth(17)
+    this.drawTileDiamond(marker, center.x, center.y - halfTileH, quote.color, isSelected ? 0.28 : 0.08, quote.color, isSelected ? 0.88 : 0.34)
+
+    const icon = this.add.image(center.x, center.y - 26, quote.icon).setScale(isSelected ? 1.15 : 0.86).setDepth(markerDepth + 2)
     icon.setInteractive({ useHandCursor: true })
-    icon.on('pointerdown', () => {
-      state.selectedSite = site.id
-      state.news = `${site.label}: ${site.role}.`
-      renderHud()
-    })
+    icon.on('pointerdown', () => this.selectSite(site))
+
+    const zone = this.add.zone(center.x, center.y - halfTileH, TILE_WIDTH * TILE_SCALE, TILE_HEIGHT * TILE_SCALE)
+    zone.setDepth(markerDepth + 3)
+    zone.setInteractive({ useHandCursor: true })
+    zone.on('pointerdown', () => this.selectSite(site))
 
     if (!isSelected) {
       return
     }
 
-    const labelBg = this.add.graphics().setDepth(18)
-    labelBg.fillStyle(0x111711, 0.84)
-    labelBg.fillRoundedRect(x - 69 * this.worldScale, y + 18 * this.worldScale, 138 * this.worldScale, 38 * this.worldScale, 7 * this.worldScale)
-    labelBg.lineStyle(1 * this.worldScale, quote.color, 0.8)
-    labelBg.strokeRoundedRect(x - 69 * this.worldScale, y + 18 * this.worldScale, 138 * this.worldScale, 38 * this.worldScale, 7 * this.worldScale)
+    const labelBg = this.add.graphics().setDepth(markerDepth + 4)
+    labelBg.fillStyle(0x111711, 0.86)
+    labelBg.fillRoundedRect(center.x - 76, center.y - 12, 152, 42, 7)
+    labelBg.lineStyle(1, quote.color, 0.78)
+    labelBg.strokeRoundedRect(center.x - 76, center.y - 12, 152, 42, 7)
 
     this.add
-      .text(x, y + 27 * this.worldScale, site.label, {
+      .text(center.x, center.y - 1, site.label, {
         color: '#fff4cf',
         fontFamily: 'Inter, system-ui, sans-serif',
-        fontSize: `${Math.round(11 * this.worldScale)}px`,
+        fontSize: '13px',
         fontStyle: '700',
       })
       .setOrigin(0.5)
-      .setDepth(19)
+      .setDepth(markerDepth + 5)
 
     this.add
-      .text(x, y + 42 * this.worldScale, `${quote.shortName} ${quote.price.toFixed(0)}c`, {
+      .text(center.x, center.y + 16, `${quote.shortName} ${quote.price.toFixed(0)}c`, {
         color: quote.trend >= 0 ? '#b7e06a' : '#ff8f73',
         fontFamily: 'Inter, system-ui, sans-serif',
-        fontSize: `${Math.round(10 * this.worldScale)}px`,
+        fontSize: '12px',
       })
       .setOrigin(0.5)
-      .setDepth(19)
+      .setDepth(markerDepth + 5)
+  }
+
+  private selectSite(site: Site) {
+    state.selectedSite = site.id
+    state.news = `${site.label}: ${site.role}.`
+    renderHud()
+  }
+
+  private drawTileDiamond(
+    graphics: Phaser.GameObjects.Graphics,
+    centerX: number,
+    topY: number,
+    fillColor: number,
+    fillAlpha: number,
+    lineColor: number,
+    lineAlpha: number,
+  ) {
+    graphics.fillStyle(fillColor, fillAlpha)
+    graphics.lineStyle(2, lineColor, lineAlpha)
+    graphics.beginPath()
+    graphics.moveTo(centerX, topY)
+    graphics.lineTo(centerX + halfTileW, topY + halfTileH)
+    graphics.lineTo(centerX, topY + halfTileH * 2)
+    graphics.lineTo(centerX - halfTileW, topY + halfTileH)
+    graphics.closePath()
+    graphics.fillPath()
+    graphics.strokePath()
+  }
+
+  private gridToWorld(row: number, col: number) {
+    return {
+      x: isoOriginX + (col - row) * halfTileW,
+      y: ISO_TOP + (col + row) * halfTileH,
+    }
+  }
+
+  private tileCenter(row: number, col: number) {
+    const point = this.gridToWorld(row, col)
+    return {
+      x: point.x,
+      y: point.y + halfTileH,
+    }
   }
 
   private handleKeyboardPan(delta: number) {
@@ -442,20 +610,12 @@ class MarketScene extends Phaser.Scene {
       market: Object.fromEntries(Object.entries(state.market).map(([key, quote]) => [key, Math.round(quote.price)])),
     })
   }
-
-  private worldX(x: number) {
-    return x * this.worldScale
-  }
-
-  private worldY(y: number) {
-    return y * this.worldScale
-  }
 }
 
 const game = new Phaser.Game({
   type: Phaser.AUTO,
   parent: 'game',
-  backgroundColor: '#0e1514',
+  backgroundColor: '#0f1918',
   scale: {
     mode: Phaser.Scale.RESIZE,
     width: window.innerWidth,
@@ -478,10 +638,10 @@ function marketTick() {
   }
 
   const events = [
-    'Arena desks opened a new liquidity rotation.',
-    'Forge sheds are buying Compute Alloy above yesterday close.',
+    'Exchange Tower opened a new liquidity rotation.',
+    'Foundry Row is buying Compute Alloy above yesterday close.',
     'Signal Dust rallied after a relay shortage.',
-    'North Mine supply increased, but contracts are absorbing inventory.',
+    'Ore Yard output increased, but contracts are absorbing inventory.',
     'Brain Core demand is pulling resources into hatch labs.',
   ]
   state.news = events[state.tick % events.length]
