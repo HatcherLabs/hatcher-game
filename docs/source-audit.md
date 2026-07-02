@@ -42,16 +42,15 @@ This repository starts as original Hatcher Markets code, with selected ideas tak
   - Result: reference only; do not copy assets.
   - Useful parts: idle/RPG loop inspiration.
 
-## Initial reuse decision
+## Current reuse decision
 
-Use a clean Phaser 3 + TypeScript + Vite frontend. Keep simulation state outside the renderer and use DOM panels for dense HUD/market text.
+The active baseline is now a Hatcher-themed adaptation of `TeamDay-AI/business-tycoon`.
 
-Current baseline:
-
-- Phaser/Vite runtime shape inspired by the farming/mining candidates.
-- Hatcher-specific resource names and market verbs.
-- Original lightweight market tick simulation in TypeScript.
-- Pixel Farm Valley item sprites copied under `public/assets/` as temporary open-source prototype art.
-- The active map is now a runtime-built isometric city grid using `isocity`/Kenney tile frames, not a screenshot background.
-- Current map presentation uses Phaser camera bounds, drag/WASD panning, wheel zoom, discrete lot markers, and DOM HUD panels.
-- Replace or reskin prototype art before any polished public launch if Hatcher needs a fully proprietary visual identity.
+- License: MIT.
+- Local audit copy: `/home/cristian/Projects/research/hatcher-game-source-audit-2/business-tycoon`.
+- License text retained at `docs/business-tycoon-MIT-LICENSE.txt`.
+- Stack: Vite plus plain JavaScript canvas renderer and DOM HUD panels.
+- Useful parts: playable business tycoon loop, room building, agent hiring, mission pipeline, events, analytics, floating cashflow chart, minimap, and auto-manager behavior.
+- Hatcher changes: player-facing copy now uses Hatcher Markets language: vault, agents, hatch cycles, market rooms, missions, yield, signal flow, Brain Cores, Treasury, Compliance Desk, and Auto Steward.
+- Current map is the Business Tycoon floor-plan/corridor canvas. Treat it as the playable tycoon base; map art/layout can be replaced in the next iteration.
+- City/HQ update: the multiplayer common-city entry surface now uses selected MIT building assets from `amilich/isometric-city` with a local canvas renderer. The Next/React app architecture was not copied.

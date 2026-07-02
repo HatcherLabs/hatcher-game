@@ -1,0 +1,10 @@
+{
+  "name": "Hatcher Markets — Agent Economy Tycoon",
+  "short_name": "Hatcher Markets",
+  "description": "Hatch agents, build rooms, and run missions in a Hatcher economy game.",
+  "start_url": "./",
+  "display": "standalone",
+  "theme_color": "#10241f",
+  "background_color": "#07110f",
+  "icons": []
+}
